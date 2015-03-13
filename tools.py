@@ -3,7 +3,7 @@ import boto
 import os.path
 from flask import current_app as app
 from werkzeug.utils import secure_filename
-
+from boto.s3.key import Key
 
 def s3_upload(source_file, acl='public-read'):
     """ Uploads WTForm File Object to Amazon S3
@@ -24,13 +24,15 @@ def s3_upload(source_file, acl='public-read'):
     source_extension = os.path.splitext(source_filename)[1]
 
     destination_filename = uuid4().hex + source_extension
-
     # Connect to S3 and upload file.
     conn = boto.connect_s3(app.config["S3_KEY"], app.config["S3_SECRET"])
     b = conn.get_bucket(app.config["S3_BUCKET"])
 
-    sml = b.new_key("/".join([app.config["S3_UPLOAD_DIRECTORY"], destination_filename]))
-    sml.set_contents_from_string(source_file.data.readlines())
-    sml.set_acl(acl)
+    k = Key(b)
+    k.key = destination_filename
+    file_contents = source_file.data.read()
+    k.set_contents_from_string(file_contents)
+    public_url = k.generate_url(0, query_auth=False)
+#   k.set_acl(acl)
 
-    return destination_filename
+    return destination_filename + " " + public_url
