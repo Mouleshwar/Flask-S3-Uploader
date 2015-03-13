@@ -14,7 +14,7 @@ class UploadForm(Form):
 
 @app.route('/', methods=['POST', 'GET'])
 def upload_page():
-    form = UploadForm()
+    form = UploadForm(csrf_enabled=False)
     if form.validate_on_submit():
         output = s3_upload(form.example)
         flash('{src} uploaded to S3 as {dst} and its urs is {url}'.format(src=form.example.data.filename, dst=output.split(" ")[0], url=output.split(" ")[1]))
