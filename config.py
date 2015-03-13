@@ -9,3 +9,6 @@ S3_BUCKET = 'pstakecare'
 SECRET_KEY = "FLASK_SECRET_KEY"
 DEBUG = True
 PORT = 5000
+
+LOCAL_OUTPUT_DIR = "media/"
+HOST = "http://static.pstakecare.com/"

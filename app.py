@@ -1,7 +1,7 @@
 from flask import Flask, render_template, flash
 from flask_wtf import Form
 from flask_wtf.file import FileField
-from tools import s3_upload
+from tools import s3_upload, store_locally
 import json 
 
 app = Flask(__name__)
@@ -15,8 +15,9 @@ class UploadForm(Form):
 @app.route('/', methods=['POST', 'GET'])
 def upload_page():
     form = UploadForm(csrf_enabled=False)
+    upload_file = form.example
     if form.validate_on_submit():
-        output = s3_upload(form.example)
+        output = s3_upload(upload_file)
         flash('{src} uploaded to S3 as {dst} and its urs is {url}'.format(src=form.example.data.filename, dst=output.split(" ")[0], url=output.split(" ")[1]))
         response = {}
         response['url'] = output.split(" ")[1]

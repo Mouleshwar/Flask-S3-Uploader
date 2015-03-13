@@ -1,5 +1,6 @@
 from uuid import uuid4
 import boto
+import os
 import os.path
 from flask import current_app as app
 from werkzeug.utils import secure_filename
@@ -20,10 +21,7 @@ def s3_upload(source_file, acl='public-read'):
         the source file.
     """
 
-    source_filename = secure_filename(source_file.data.filename)
-    source_extension = os.path.splitext(source_filename)[1]
-
-    destination_filename = uuid4().hex + source_extension
+    destination_filename = get_destination_filename(source_file)
     # Connect to S3 and upload file.
     conn = boto.connect_s3(app.config["S3_KEY"], app.config["S3_SECRET"])
     b = conn.get_bucket(app.config["S3_BUCKET"])
@@ -36,3 +34,22 @@ def s3_upload(source_file, acl='public-read'):
 #   k.set_acl(acl)
 
     return destination_filename + " " + public_url
+
+
+def store_locally(source_file):
+    """
+        Stores the uploaded file locally
+    """
+    destination_filename = get_destination_filename(source_file)
+
+    file_contents = source_file.data.read()
+    print "file contents from store_locally" + file_contents
+    with open(app.config["LOCAL_OUTPUT_DIR"]+destination_filename, 'w') as output_file:
+        output_file.write(file_contents)
+    output_file.close()
+    url = app.config["HOST"] + app.config["LOCAL_OUTPUT_DIR"] + destination_filename
+    return url
+
+def get_destination_filename(source_file):
+    source_filename = secure_filename(source_file.data.filename)
+    return  uuid4().hex + source_filename
