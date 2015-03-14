@@ -2,3 +2,5 @@
 *.pyc
 *.swo
 config.py
+media/
+*.swn

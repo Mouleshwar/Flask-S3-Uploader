@@ -5,6 +5,7 @@ import os.path
 from flask import current_app as app
 from werkzeug.utils import secure_filename
 from boto.s3.key import Key
+from mimetypes import MimeTypes
 
 def s3_upload(source_file, acl='public-read'):
     """ Uploads WTForm File Object to Amazon S3
@@ -30,10 +31,9 @@ def s3_upload(source_file, acl='public-read'):
     k.key = destination_filename
     file_contents = source_file.data.read()
     k.set_contents_from_string(file_contents)
-    public_url = k.generate_url(0, query_auth=False)
-#   k.set_acl(acl)
+    public_url = k.generate_url(-1, query_auth=False)
 
-    return destination_filename + " " + public_url
+    return public_url
 
 
 def store_locally(source_file):
@@ -41,15 +41,25 @@ def store_locally(source_file):
         Stores the uploaded file locally
     """
     destination_filename = get_destination_filename(source_file)
-
-    file_contents = source_file.data.read()
-    print "file contents from store_locally" + file_contents
-    with open(app.config["LOCAL_OUTPUT_DIR"]+destination_filename, 'w') as output_file:
-        output_file.write(file_contents)
-    output_file.close()
-    url = app.config["HOST"] + app.config["LOCAL_OUTPUT_DIR"] + destination_filename
+    
+    mimetype = MimeTypes().guess_type(source_file.data.filename)[0]
+    print mimetype
+    if is_filetype_valid(mimetype):
+        file_contents = source_file.data.read()
+        with open(app.config["LOCAL_OUTPUT_DIR"]+destination_filename, 'w') as output_file:
+            output_file.write(file_contents)
+        output_file.close()
+        url = app.config["HOST"] + app.config["LOCAL_OUTPUT_DIR"] + destination_filename
+    else:
+        return None
     return url
 
 def get_destination_filename(source_file):
     source_filename = secure_filename(source_file.data.filename)
     return  uuid4().hex + source_filename
+
+def is_filetype_valid(mimetype):
+    for file_type in app.config["ALLOWED_IMAGE_TYPES"]:
+        if mimetype==file_type:
+            return True
+    return False

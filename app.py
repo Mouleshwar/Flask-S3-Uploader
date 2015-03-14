@@ -17,11 +17,14 @@ def upload_page():
     form = UploadForm(csrf_enabled=False)
     upload_file = form.example
     if form.validate_on_submit():
-        output = s3_upload(upload_file)
-        flash('{src} uploaded to S3 as {dst} and its urs is {url}'.format(src=form.example.data.filename, dst=output.split(" ")[0], url=output.split(" ")[1]))
+        output = store_locally(upload_file)
         response = {}
-        response['url'] = output.split(" ")[1]
-        return json.dumps(response, indent=4)
+        if output is not None:
+            response['url'] = output
+            return json.dumps(response, indent=4)
+        else:
+            response['url'] = None
+            return json.dumps(response, indent=4), app.config["INVALID_DATA"] 
     return render_template('example.html', form=form)    
 
 if __name__ == '__main__':
