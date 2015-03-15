@@ -7,11 +7,12 @@ S3_UPLOAD_DIRECTORY = 'what_directory_on_s3'
 S3_BUCKET = 's3_bucket_name'
 
 SECRET_KEY = "FLASK_SECRET_KEY"
-DEBUG = True
+HOST = "127.0.0.1"
 PORT = 5000
+DEBUG = True
 
 LOCAL_OUTPUT_DIR = "media/"
-HOST = "HOSTNAME"
+HOSTNAME = "HOSTNAME"
 
 ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png']
 
