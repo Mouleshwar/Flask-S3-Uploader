@@ -49,7 +49,7 @@ def store_locally(source_file):
         with open(app.config["LOCAL_OUTPUT_DIR"]+destination_filename, 'w') as output_file:
             output_file.write(file_contents)
         output_file.close()
-        url = app.config["HOST"] + app.config["LOCAL_OUTPUT_DIR"] + destination_filename
+        url = 'http://' + app.config["HOSTNAME"] + "/media/" + destination_filename
     else:
         return None
     return url
