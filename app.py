@@ -1,3 +1,4 @@
+from os import environ
 from flask import Flask, render_template, flash
 from flask_wtf import Form
 from flask_wtf.file import FileField
@@ -28,4 +29,8 @@ def upload_page():
     return render_template('example.html', form=form)    
 
 if __name__ == '__main__':
-    app.run(host=app.config["HOST"], port=app.config["PORT"], debug=app.config["DEBUG"])
+    if environ.has_key('FLASK_ENV') and environ['FLASK_ENV'] == 'production':
+        from gevent.wsgi import WSGIServer
+        WSGIServer((app.config["HOST"], app.config["PORT"]), app).serve_forever()
+    else:
+        app.run(host=app.config["HOST"], port=app.config["PORT"], debug=app.config["DEBUG"])
